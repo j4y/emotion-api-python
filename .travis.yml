@@ -1,0 +1,18 @@
+language: python
+python:
+- '2.7'
+install:
+- pip install -r requirements.txt
+script:
+- python setup.py sdist
+before_deploy:
+- export RELEASE_PKG_FILE=$(ls dist/*.tar.gz)
+deploy:
+  provider: releases
+  api_key:
+    secure: ITGjdvlcEOFt7xbb5NNK46UVQTy9HusPoR4KUiFJ1W1+bfJRU5/H/ef4JdvjAMEbjvu7fshU67u/7ekZIlIsp+tU7WxoseaY9SF1WkvolYsxwzWvS80xE+dVHzTnZL2xMxBSbOgFyoybzGfE6oPnOT4l+0kRUtMpGPrsk0xK8B9N+HHArwv3ixyxrMfH0/WC0RIJZEXGr09q31BueMeXy2cm+UfUtGHusc254kmKmnlfd/iULaB39uIOtk5owYdETTiut66J5bL9ssZDQ+z99VmGdgcFBubBcY+iGFSp6Gx4cjkBFy41ek5poyQYvPluIhsWnhUBlPEHRgwWuX0QQ2LXXhXG0bHpvhrckTvhaJnNtfb8um9HCAaC/fQnbiUCSo1W1WA1qWGqSGGdt/P7wIiyq/pgGyJ69xMK2uD2cbbTywSve1jHYVq/3YhXSC2atN8sbTIQ+2P8a8ZLDwXBFm73F0VmJRV3PubN643pb9ZD0WTtpDekdj2MUuo+jPLMHrtlAKSojyvXeR0Qh20ei74Ex2LKLsLQNUHtqQ4U5Ce+SGdWAUa6qC6iiqmn8WG3cq+D2fkxxnq+h7EhmvLsNJc+2t12M3pIrjWjl9TkSaLZCyhQ7hRVJV/HGxNpQX9PRvsPbX78nqdctntlGRRSInnDgRLmcl3RLxGurkv4CdM=
+  file_glob: true
+  file: '${RELEASE_PKG_FILE}'
+  on:
+    branch: master
+    repo: Affectiva/emotion-api-python
