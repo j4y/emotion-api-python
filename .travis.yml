@@ -4,6 +4,7 @@ python:
 install:
 - pip install -r requirements.txt
 script:
+- python setup.py flake8
 - python setup.py sdist
 before_deploy:
 - export RELEASE_PKG_FILE=$(ls dist/*.tar.gz)

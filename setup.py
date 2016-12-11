@@ -67,7 +67,8 @@ setup(
     # The minimal requirements for the library .. list all the requirements in
     # requirements.txt
     install_requires=[
-       'requests'
+       'requests',
+       'flake8'
     ],
 
     include_package_data=True
@@ -102,4 +103,3 @@ setup(
     #    ],
     # },
 )
-
