@@ -115,3 +115,14 @@ class EmotionAPI:
                 media_resp = requests.get(media_url, auth=self._auth)
                 fout.write(media_resp.content)
             return local_path
+
+    def list_jobs(self):
+        """List all the jobs in an account.
+
+        Returns:
+            JSON response containing all the jobs.
+            ['status', 'updated', 'author', 'self', 'filename', 'published']
+        """
+        headers = {'Accept': 'application/json'}
+        resp = requests.get(self._job_url, auth=self._auth, headers=headers)
+        return resp.json()
