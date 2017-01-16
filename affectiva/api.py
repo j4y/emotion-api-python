@@ -116,7 +116,17 @@ class EmotionAPI:
                 fout.write(media_resp.content)
             return local_path
 
-    def list_jobs(self):
+    def results(self, job_url):
+        metrics = []
+        job_json = self.query_job(job_url)
+        for representation in job_json['result']['representations']:
+            if representation['content_type'] == 'application/vnd.affectiva.metrics.v0+json':
+                media_url = representation['media']
+                media_resp = requests.get(media_url, auth=self._auth)
+                metrics = media_resp.json()
+        return metrics
+
+    def jobs(self):
         """List all the jobs in an account.
 
         Returns:
