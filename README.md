@@ -31,7 +31,7 @@ Usage
 import affectiva.api
 username = 'API_USER'
 passwd = 'API_PASSWD'
-api = affectiva.api.EmotionAPI(user,passwd)
+api = affectiva.api.EmotionAPI(username,passwd)
 
 # Upload a file for Processing
 filename = '/home/mahmoud/Desktop/test_file.mp4'
