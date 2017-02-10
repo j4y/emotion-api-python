@@ -11,7 +11,7 @@ class EmotionAPI:
     resp = api.create_job( 'path/to/local/video.mp4' )     # Upload video
     job_url = resp['self']
 
-    api.retrieve_results( job_url )                        # Download results (results may not be available immediately)
+    api.results( job_url )                        # Get the results (results may not be available immediately)
     """
 
     EAAS_USER_ENV_VAR = 'AFFECTIVA_API_USER'  # Environment variable from which we will attempt to user (for authentication)
@@ -83,8 +83,8 @@ class EmotionAPI:
         resp_json = resp.json()
         return resp_json
 
-    def retrieve_results(self, job_url, content_type='application/csv', output_dir='.'):
-        """Retrieve results from a job and save locally.
+    def download_results(self, job_url, content_type='application/csv', output_dir='.'):
+        """download results from a job and save locally.
 
         Args:
             job_url: URL returned from create_job used to retrieve results
@@ -117,10 +117,17 @@ class EmotionAPI:
             return local_path
 
     def results(self, job_url):
+        """Returns the results for a processed image or video.
+
+        Returns:
+            JSON response contains the metric results for a processed job
+            For more information about output, see application/vnd.affectiva.session.v0+json
+            in http://developer.affectiva.com/api/contenttypes/
+        """
         metrics = []
         job_json = self.query_job(job_url)
         for representation in job_json['result']['representations']:
-            if representation['content_type'] == 'application/vnd.affectiva.metrics.v0+json':
+            if representation['content_type'] == 'application/vnd.affectiva.session.v0+json':
                 media_url = representation['media']
                 media_resp = requests.get(media_url, auth=self._auth)
                 metrics = media_resp.json()
