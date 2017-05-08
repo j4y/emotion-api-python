@@ -65,6 +65,7 @@ class EmotionAPI:
             files = {'entry_job[name]': (None, job_name),
                      'entry_job[input]': (os.path.basename(media_path), video)}
             resp = requests.post(self._job_url, auth=self._auth, headers=headers, files=files)
+            resp.raise_for_status()
             return resp.json()
 
     def query_job(self, job_url):
@@ -78,10 +79,8 @@ class EmotionAPI:
         """
         headers = {'Accept': 'application/json'}
         resp = requests.get(job_url, auth=self._auth, headers=headers)
-
-        assert resp.status_code == 200
-        resp_json = resp.json()
-        return resp_json
+        resp.raise_for_status()
+        return resp.json()
 
     def download_results(self, job_url, content_type='application/csv', output_dir='.'):
         """download results from a job and save locally.
@@ -113,6 +112,7 @@ class EmotionAPI:
             with open(local_path, 'wb') as fout:
                 media_url = result_json['media']
                 media_resp = requests.get(media_url, auth=self._auth)
+                media_resp.raise_for_status()
                 fout.write(media_resp.content)
             return local_path
 
@@ -130,6 +130,7 @@ class EmotionAPI:
             if representation['content_type'] == 'application/vnd.affectiva.session.v0+json':
                 media_url = representation['media']
                 media_resp = requests.get(media_url, auth=self._auth)
+                media_resp.raise_for_status()
                 metrics = media_resp.json()
         return metrics
 
@@ -142,4 +143,5 @@ class EmotionAPI:
         """
         headers = {'Accept': 'application/json'}
         resp = requests.get(self._job_url, auth=self._auth, headers=headers)
+        resp.raise_for_status()
         return resp.json()
