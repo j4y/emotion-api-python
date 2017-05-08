@@ -2,6 +2,9 @@ import requests
 import os
 
 
+ACCEPT_JSON = {'Accept': 'application/json'}
+
+
 class EmotionAPI:
     """Class to handle interfacing with Affectiva's Emotion as a Service API.
 
@@ -46,8 +49,7 @@ class EmotionAPI:
             version:  Job version string (e.g. 'v1')
         """
 
-        headers = {'Accept': 'application/json'}
-        resp = requests.get(self.INDEX_SERVICE_URL, headers=headers)
+        resp = requests.get(self.INDEX_SERVICE_URL, headers=ACCEPT_JSON)
         return resp.json()[version][self.JOB_SERVICE_KEY]
 
     def create_job(self, media_path, job_name='current-pack'):
@@ -60,11 +62,10 @@ class EmotionAPI:
         Returns:
              JSON response with keys: 'status', 'updated', 'name', 'author', 'self', 'published', 'input'
         """
-        headers = {'Accept': 'application/json'}
         with open(media_path, 'rb') as video:
             files = {'entry_job[name]': (None, job_name),
                      'entry_job[input]': (os.path.basename(media_path), video)}
-            resp = requests.post(self._job_url, auth=self._auth, headers=headers, files=files)
+            resp = requests.post(self._job_url, auth=self._auth, headers=ACCEPT_JSON, files=files)
             resp.raise_for_status()
             return resp.json()
 
@@ -77,8 +78,7 @@ class EmotionAPI:
         Returns:
             JSON response
         """
-        headers = {'Accept': 'application/json'}
-        resp = requests.get(job_url, auth=self._auth, headers=headers)
+        resp = requests.get(job_url, auth=self._auth, headers=ACCEPT_JSON)
         resp.raise_for_status()
         return resp.json()
 
@@ -141,7 +141,6 @@ class EmotionAPI:
             JSON response containing all the jobs.
             ['status', 'updated', 'author', 'self', 'filename', 'published']
         """
-        headers = {'Accept': 'application/json'}
-        resp = requests.get(self._job_url, auth=self._auth, headers=headers)
+        resp = requests.get(self._job_url, auth=self._auth, headers=ACCEPT_JSON)
         resp.raise_for_status()
         return resp.json()
