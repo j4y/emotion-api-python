@@ -52,7 +52,7 @@ class EmotionAPI:
         resp = requests.get(self.INDEX_SERVICE_URL, headers=ACCEPT_JSON)
         return resp.json()[version][self.JOB_SERVICE_KEY]
 
-    def create_job(self, media_path, job_name='current-pack'):
+    def create_job(self, media_path, job_name='multiface'):
         """Upload a media file (e.g. video) for processing.
 
         Args:
