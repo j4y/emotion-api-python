@@ -146,7 +146,6 @@ class EmotionAPI:
         return resp.json()
 
     def add_annotation(self, entry, source, key, value):
-        annotation_url = entry['annotations']
         resp = requests.post(entry['annotations'], auth=self._auth, headers=ACCEPT_JSON, data={"annotation[source]": source, "annotation[key]": key, "annotation[value]": value})
         resp.raise_for_status()
         return resp.json()
