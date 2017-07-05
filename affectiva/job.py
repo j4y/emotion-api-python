@@ -1,10 +1,12 @@
 import requests
 import json
 
+
 class Base(object):
     _url = ''
     _user = ''
     _password = ''
+
     def __init__(self, url=None, user=None, password=None):
         self._url = url
         self._user = user
@@ -26,6 +28,7 @@ class Base(object):
     def _post(self, url, payload):
         resp = requests.post(url, auth=self._auth, headers=self._headers, data=json.dumps(payload))
         return resp.json()
+
 
 class Entry(Base):
     _annotation_url = ''
@@ -75,4 +78,4 @@ class Entry(Base):
         """
 
         for annotation in annotations:
-            resp = self._post(self._annotation_url, {"annotation": annotation})
+            self._post(self._annotation_url, {"annotation": annotation})
