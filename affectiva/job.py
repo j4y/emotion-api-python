@@ -2,6 +2,9 @@ import requests
 import json
 
 
+ACCEPT_JSON = {'Accept': 'application/json'}
+
+
 class Base(object):
     _url = ''
     _user = ''
@@ -79,3 +82,26 @@ class Entry(Base):
 
         for annotation in annotations:
             self._post(self._annotation_url, {"annotation": annotation})
+
+    def add_representation(self, entry, media_path, mimetype):
+        """Upload an additional representation to the provided entry.
+
+        Args:
+            entry: A dict containing the entry to which the
+              representation will be attached.
+            media_path: Path to local media file to be uploaded.  The
+              entry must not already have a representation with this
+              filename.
+            mimetype: A string with the representation's media type.
+
+        Example:
+        >>> from affectiva.api import EmotionAPI
+        >>> e = EmotionAPI()
+        >>> j = e.create_job('video1.mp4')
+        >>> e.add_representation(j['input'],'video2.mp4','application/vnd.affectiva.example+mp4')
+
+        """
+        metadata = {'media': (media_path, open(media_path, 'rb'), mimetype)}
+        resp = requests.post(entry['representation_self'], auth=self._auth, headers=ACCEPT_JSON, files=metadata)
+        resp.raise_for_status()
+        return resp.json()
