@@ -17,6 +17,11 @@ class Base(object):
                          'Content-Type': 'application/json'}
         self._details = self._details()
 
+    def delete(self):
+        """Delete a base type.
+        """
+        self._delete(self._url)
+
     def _details(self):
         """Get the entry details from API.
         """
