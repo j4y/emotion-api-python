@@ -25,7 +25,7 @@ class Base(object):
     def _details(self):
         """Get the entry details from API.
         """
-        return self._get(self._url)
+        return self._get(self._url) if self._url is not None else dict()
 
     def _get(self, url):
         resp = requests.get(url, auth=self._auth, headers=self._headers)
@@ -55,7 +55,8 @@ class Entry(Base):
             annotations_url: Annotations URL returned from job entry
         """
 
-        return self._get(self._annotation_url)
+        return [Annotation(url=annotation['self'], user=self._user,
+                           password=self._password) for annotation in self._get(self._annotation_url)]
 
     def annotations(self):
         """Get the list of annotations.
@@ -88,23 +89,7 @@ class Entry(Base):
         """
 
         for annotation in annotations:
-            self._post(self._annotation_url, {"annotation": annotation})
-
-    def delete_annotation(self, annotation=dict()):
-        """Remove an annotation from an entry.
-        Args:
-            annotation: the annotation to be removed
-        """
-
-        annotations = self.annotations()
-        for a in annotations:
-            if (a['source'] == annotation['source'] and
-                    a['key'] == annotation['key'] and
-                    a['value'] == annotation['value']):
-
-                self._delete(a['self'])
-                break
-
+            self._post(self._annotation_url, {"annotation": dict(annotation)})
 
 class Representation(Base):
     _media_url = ''
@@ -148,3 +133,37 @@ class Representation(Base):
         resp = requests.get(self._media_url, stream=True, auth=self._auth)
         with open(file_path, 'wb') as out_file:
             shutil.copyfileobj(resp.raw, out_file)
+
+class Annotation(Base):
+    def __init__(self, key=None, value=None, source=None, **kwargs):
+        super(Annotation, self).__init__(**kwargs)
+        if len(self._details) is 0:
+            self._details['source'] = source
+            self._details['key'] = key
+            self._details['value'] = value
+
+    def __iter__(self):
+        yield 'source', self._details['source']
+        yield 'key', self._details['key']
+        yield 'value', self._details['value']
+
+    def source(self):
+        """Get the annotation source
+        Returns:
+             return a str representation of the annotation source
+        """
+        return self._details['source']
+
+    def key(self):
+        """Get the annotation key
+        Returns:
+             return a str representation of the annotation key
+        """
+        return self._details['key']
+
+    def value(self):
+        """Get the annotation value
+        Returns:
+             return a str representation of the annotation value
+        """
+        return self._details['value']
