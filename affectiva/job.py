@@ -4,14 +4,16 @@ import shutil
 
 
 class Base(object):
+    EAAS_USER_ENV_VAR = 'AFFECTIVA_API_USER'  # Environment variable from which we will attempt to user (for authentication)
+    EAAS_PASS_ENV_VAR = 'AFFECTIVA_API_PASSWORD'  # Environment variable from which we will attempt to password (for authentication)
     _url = ''
     _user = ''
     _password = ''
 
     def __init__(self, url=None, user=None, password=None):
         self._url = url
-        self._user = user
-        self._password = password
+        self._user = user if user else os.environ.get(self.EAAS_USER_ENV_VAR, None)
+        self._password = password if password else os.environ.get(self.EAAS_PASS_ENV_VAR, None)
         self._auth = (self._user, self._password)
         self._headers = {'Accept': 'application/json',
                          'Content-Type': 'application/json'}
@@ -55,8 +57,7 @@ class Entry(Base):
             annotations_url: Annotations URL returned from job entry
         """
 
-        return [Annotation(url=annotation['self'], user=self._user,
-                           password=self._password) for annotation in self._get(self._annotation_url)]
+        return [Annotation(url=annotation['self']) for annotation in self._get(self._annotation_url)]
 
     def annotations(self):
         """Get the list of annotations.
@@ -72,8 +73,7 @@ class Entry(Base):
         Returns:
              return list of representations.
         """
-        return [Representation(url=representation['self'], user=self._user,
-                               password=self._password) for representation in self._details['representations']]
+        return [Representation(url=representation['self']) for representation in self._details['representations']]
 
     def length(self):
         """Get length of media in seconds.
