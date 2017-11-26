@@ -73,7 +73,7 @@ class Entry(Base):
         Returns:
              return list of representations.
         """
-        self._details = self._get_details() # The Only way to refresh the representations
+        self._details = self._get_details()  # The Only way to refresh the representations
         return [Representation(url=representation['self']) for representation in self._details['representations']]
 
     def length(self):
@@ -108,6 +108,7 @@ class Entry(Base):
                              headers=self._headers, files=metadata)
         resp.raise_for_status()
 
+
 class Representation(Base):
 
     def __init__(self, **kwargs):
@@ -139,9 +140,10 @@ class Representation(Base):
         Args:
             file_path: the path to save media on disk
         """
-        resp = requests.get(self._url+'/media', stream=True, auth=self._auth)
+        resp = requests.get(self._url + '/media', stream=True, auth=self._auth)
         with open(file_path, 'wb') as out_file:
             shutil.copyfileobj(resp.raw, out_file)
+
 
 class Annotation(Base):
     def __init__(self, key=None, value=None, source=None, **kwargs):
