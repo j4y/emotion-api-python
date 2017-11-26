@@ -92,45 +92,37 @@ class Entry(Base):
             self._post(self._annotation_url, {"annotation": dict(annotation)})
 
 class Representation(Base):
-    _media_url = ''
-    _file_name = ''
-    _file_size = 0
-    _content_type = ''
 
-    def __init__(self, media_url='', **kwargs):
+    def __init__(self, **kwargs):
         super(Representation, self).__init__(**kwargs)
-        self._media_url = media_url
-        self._file_name = self._details['file_name']
-        self._file_size = self._details['file_size']
-        self._content_type = self._details['content_type']
 
     def file_name(self):
         """Get the file name of the media
         Returns:
              return str representation of the uploaded filename
         """
-        return self._file_name
+        return self._details['file_name']
 
     def file_size(self):
         """Get the media file size
         Returns:
              return the media file size in bytes
         """
-        return self._file_size
+        return self._details['file_size']
 
     def content_type(self):
         """Get the media content type
         Returns:
              return a str representation of the content type
         """
-        return self._content_type
+        return self._details['content_type']
 
     def save_media(self, file_path):
         """Download media representation and save it as file.
         Args:
             file_path: the path to save media on disk
         """
-        resp = requests.get(self._media_url, stream=True, auth=self._auth)
+        resp = requests.get(self._url+'/media', stream=True, auth=self._auth)
         with open(file_path, 'wb') as out_file:
             shutil.copyfileobj(resp.raw, out_file)
 
