@@ -1,6 +1,7 @@
 import requests
 import json
 import shutil
+import os
 
 
 class Base(object):
@@ -15,16 +16,15 @@ class Base(object):
         self._user = user if user else os.environ.get(self.EAAS_USER_ENV_VAR, None)
         self._password = password if password else os.environ.get(self.EAAS_PASS_ENV_VAR, None)
         self._auth = (self._user, self._password)
-        self._headers = {'Accept': 'application/json',
-                         'Content-Type': 'application/json'}
-        self._details = self._details()
+        self._headers = {'Accept': 'application/json'}
+        self._details = self._get_details()
 
     def delete(self):
         """Delete a base type.
         """
         self._delete(self._url)
 
-    def _details(self):
+    def _get_details(self):
         """Get the entry details from API.
         """
         return self._get(self._url) if self._url is not None else dict()
@@ -73,6 +73,7 @@ class Entry(Base):
         Returns:
              return list of representations.
         """
+        self._details = self._get_details() # The Only way to refresh the representations
         return [Representation(url=representation['self']) for representation in self._details['representations']]
 
     def length(self):
@@ -90,6 +91,22 @@ class Entry(Base):
 
         for annotation in annotations:
             self._post(self._annotation_url, {"annotation": dict(annotation)})
+
+    def add_representation(self, media_path, mimetype):
+        """Upload an additional representation to the provided entry.
+
+        Args:
+            entry: A dict containing the entry to which the
+              representation will be attached.
+            media_path: Path to local media file to be uploaded.  The
+              entry must not already have a representation with this
+              filename.
+            mimetype: A string with the representation's media type.
+        """
+        metadata = {'media': (media_path, open(media_path, 'rb'), mimetype)}
+        resp = requests.post(self._details['representation_self'], auth=self._auth,
+                             headers=self._headers, files=metadata)
+        resp.raise_for_status()
 
 class Representation(Base):
 
