@@ -13,10 +13,7 @@ Dependencies
 Installation
 ------------
 ```bashrc
-git clone https://github.com/Affectiva/emotion-api-python.git
-cd emotion-api-python
-python setup.py sdist
-pip install dist/AffectivaEmotionAPI-0.0.1.tar.gz
+pip install AffectivaEmotionAPI
 ```
 
 Usage
@@ -48,4 +45,14 @@ job_status = api.query_job(job_url)['status']
 if status == 'done':
   metrics_json = api.results(job_url)
 
+```
+
+Uploading to PyPI
+-----------------
+Increment the version in setup.py
+
+```bashrc
+rm dist/*.tar.gz
+python setup.py sdist
+twine upload dist/*
 ```
