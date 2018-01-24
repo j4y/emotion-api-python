@@ -69,7 +69,9 @@ class Entry(Base):
         Returns:
              return list of representations.
         """
-        return [Representation(url=representation['self'], user=self._user,
+        return [Representation(url=representation['self'],
+                               media_url=representation['media'],
+                               user=self._user,
                                password=self._password) for representation in self._details['representations']]
 
     def length(self):
