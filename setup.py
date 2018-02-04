@@ -16,10 +16,10 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.1',
+    version='0.0.5',
 
     description='Affectiva Emotion API Python library',
-    # long_description=long_description,
+    long_description='This library allows Python programs to easily make use of the Affectiva Emotion API',
 
     # The project's main homepage.
     url='https://github.com/affectiva/emotion-api-python',

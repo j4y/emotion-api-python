@@ -1,5 +1,5 @@
-import requests
 import os
+import requests
 
 ACCEPT_JSON = {'Accept': 'application/json'}
 
@@ -50,7 +50,7 @@ class EmotionAPI:
         resp.raise_for_status()
         return resp.json()[version][self.JOB_SERVICE_KEY]
 
-    def create_job(self, media_path, job_name='current-pack'):
+    def create_job(self, media_path, job_name='multiface'):
         """Upload a media file (e.g. video) for processing.
 
         Args:
@@ -77,11 +77,11 @@ class EmotionAPI:
             JSON response
         """
         resp = requests.get(job_url, auth=self._auth, headers=ACCEPT_JSON)
-
         assert resp.status_code == 200
         resp.raise_for_status()
         resp_json = resp.json()
         return resp_json
+
 
     def download_results(self, job_url, content_type='application/csv', output_dir='.'):
         """download results from a job and save locally.
@@ -113,6 +113,7 @@ class EmotionAPI:
             with open(local_path, 'wb') as fout:
                 media_url = result_json['media']
                 media_resp = requests.get(media_url, auth=self._auth)
+                media_resp.raise_for_status()
                 fout.write(media_resp.content)
             return local_path
             
@@ -170,6 +171,7 @@ class EmotionAPI:
             if representation['content_type'] == 'application/vnd.affectiva.session.v0+json':
                 media_url = representation['media']
                 media_resp = requests.get(media_url, auth=self._auth)
+                media_resp.raise_for_status()
                 metrics = media_resp.json()
         return metrics
 
@@ -181,5 +183,31 @@ class EmotionAPI:
             ['status', 'updated', 'author', 'self', 'filename', 'published']
         """
         resp = requests.get(self._job_url, auth=self._auth, headers=ACCEPT_JSON)
+        resp.raise_for_status()
+        return resp.json()
+
+    def add_annotation(self, entry, source, key, value):
+        resp = requests.post(entry['annotations'], auth=self._auth, headers=ACCEPT_JSON,
+                             data={"annotation[source]": source, "annotation[key]": key, "annotation[value]": value})
+        resp.raise_for_status()
+        return resp.json()
+
+    def add_representation(self, entry, media_path, mimetype):
+        """Upload an additional representation to the provided entry.
+        Args:
+            entry: A dict containing the entry to which the
+              representation will be attached.
+            media_path: Path to local media file to be uploaded.  The
+              entry must not already have a representation with this
+              filename.
+            mimetype: A string with the representation's media type.
+        Example:
+        >>> from affectiva.api import EmotionAPI
+        >>> e = EmotionAPI()
+        >>> j = e.create_job('video1.mp4')
+        >>> e.add_representation(j['input'],'video2.mp4','application/vnd.affectiva.example+mp4')
+        """
+        metadata = {'media': (media_path, open(media_path, 'rb'), mimetype)}
+        resp = requests.post(entry['representation_self'], auth=self._auth, headers=ACCEPT_JSON, files=metadata)
         resp.raise_for_status()
         return resp.json()
