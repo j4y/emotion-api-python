@@ -1,14 +1,19 @@
 import requests
 import json
+import os
 
 class Base(object):
     _url = ''
     _user = ''
     _password = ''
+
+    EAAS_USER_ENV_VAR = 'AFFECTIVA_API_USER'  # Environment variable from which we will attempt to user (for authentication)
+    EAAS_PASS_ENV_VAR = 'AFFECTIVA_API_PASSWORD'  # Environment variable from which we will attempt to password (for authentication)
+
     def __init__(self, url=None, user=None, password=None):
         self._url = url
-        self._user = user
-        self._password = password
+        self._user = user if user else os.environ.get(self.EAAS_USER_ENV_VAR, None)
+        self._password = password if password else os.environ.get(self.EAAS_PASS_ENV_VAR, None)
         self._auth = (self._user, self._password)
         self._headers = {'Accept': 'application/json',
                          'Content-Type': 'application/json'}
@@ -25,6 +30,7 @@ class Base(object):
 
     def _post(self, url, payload):
         resp = requests.post(url, auth=self._auth, headers=self._headers, data=json.dumps(payload))
+        resp.raise_for_status()
         return resp.json()
 
 class Entry(Base):
