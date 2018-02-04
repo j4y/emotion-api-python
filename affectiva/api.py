@@ -50,6 +50,7 @@ class EmotionAPI(object):
         """
 
         resp = requests.get(self.INDEX_SERVICE_URL, headers=ACCEPT_JSON)
+        resp.raise_for_status()
         return resp.json()[version][self.JOB_SERVICE_KEY]
 
     def create_job(self, media_path, job_name='multiface', extra_params={}):
@@ -140,6 +141,43 @@ class EmotionAPI(object):
         all_content_types = [x['content_type'] for x in all_representations_json]
         raise ValueError("Could not match content_type '%s'.\n"
                          "Available content-types: %s" % (content_type, str(all_content_types)))
+
+    def download_media_input(self, job_url, content_type='video/mp4', output_dir='.', filename=None, add_job_id=False):
+        """
+        The function downloads media file attached to the job url passed.
+        filename is either equal to the passed filename param if passed or 'EaaS_<media_filename>_<job_id>' is add_job_id == True
+        or will be saved by default media file name saved in EaaS if no filename is passed and add_job_id == False
+        """
+        job_json = self.query_job(job_url)
+
+        result_json = None
+        all_representations_json = job_json['input']['representations']
+        for representation_json in all_representations_json:
+            if representation_json['content_type'] == content_type:
+                result_json = representation_json
+                break
+
+        if result_json is None:
+            all_content_types = [x['content_type'] for x in all_representations_json]
+            raise ValueError("Could not match content_type '%s'.\n"
+                             "Available content-types: %s" % (content_type, str(all_content_types)))
+        else:
+            if filename:
+                dst_file_name = filename
+            elif add_job_id:
+                media_file_name, ext = os.path.splitext(result_json['file_name'])
+                job_id = job_url.split('/')[-1]
+                dst_file_name = 'EAAS_' + media_file_name + '_' + job_id + ext
+            else:
+                dst_file_name = result_json['file_name']
+
+            local_path = os.path.join(output_dir, dst_file_name)
+
+            with open(local_path, 'wb') as fout:
+                media_url = result_json['media']
+                media_resp = requests.get(media_url, auth=self._auth)
+                fout.write(media_resp.content)
+            return local_path
 
     def results(self, job_url):
         """Returns the results for a processed image or video.
