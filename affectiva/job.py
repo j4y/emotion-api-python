@@ -43,6 +43,13 @@ class Entry(Base):
     _list_annotations = list()
 
     def __init__(self, **kwargs):
+        """Construct an Entity object.
+
+        Args:
+            url:  Entry url
+            user: EaaS username
+            password:  EaaS password
+        """
         super(Entry, self).__init__(**kwargs)
         self._annotation_url = self._details['annotations']
 
@@ -76,6 +83,7 @@ class Entry(Base):
 
     def length(self):
         """Get length of media in seconds.
+
         Returns:
              return double representing media in seconds.
         """
@@ -83,8 +91,12 @@ class Entry(Base):
 
     def add_annotations(self, annotations=list()):
         """Add an annotation to an account.
+
         Args:
-            annotations: list of annotations to be added
+            annotations: list of annotations (dict with 'source','key','value') to be added.
+
+            e.g. [ {'source': 'mysource1', 'key': 'mykey1', 'value': 'myvalue1' },
+                   {'source': 'mysource2', 'key': 'mykey2', 'value': 'myvalue2' } ]
         """
 
         for annotation in annotations:
@@ -116,7 +128,7 @@ class Entry(Base):
     def delete_annotation(self, annotation=dict()):
         """Remove an annotation from an entry.
         Args:
-            annotation: the annotation to be removed
+            annotation: the annotation to be removed (dict with 'source','key','value')
         """
 
         annotations = self.annotations()
