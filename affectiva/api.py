@@ -65,7 +65,7 @@ class EmotionAPI:
         with open(media_path, 'rb') as video:
             files = {'entry_job[name]': (None, job_name),
                      'entry_job[input]': (os.path.basename(media_path), video)}
-            data = {'entry[data_spli]': data_split}
+            data = {'entry[data_split]': data_split}
             resp = requests.post(self._job_url, auth=self._auth, headers=ACCEPT_JSON, files=files, data=data)
             resp.raise_for_status()
             return resp.json()
