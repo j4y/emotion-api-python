@@ -82,6 +82,22 @@ class EmotionAPI:
         resp.raise_for_status()
         return resp.json()
 
+    def update_job(self, job_url, job_name=None):
+        """Update the job.
+
+        Args:
+        job_name: (optional) Which classifier set to use.See: http://developer.affectiva.com/eaasapi/
+
+        Returns:
+            JSON response with keys ['status', 'updated', 'name', 'author', 'self', 'published', 'input']
+        """
+        data = {}
+        if job_name is not None:
+            data['entry_job[name]'] = job_name
+        resp = requests.patch(job_url, auth=self._auth, data=data, headers=ACCEPT_JSON)
+        resp.raise_for_status()
+        return resp.json()
+
     def download_results(self, job_url, content_type='application/csv', output_dir='.'):
         """download results from a job and save locally.
 
