@@ -86,7 +86,7 @@ class EmotionAPI:
         """Update the job.
 
         Args:
-        job_name: (optional) Which classifier set to use.See: http://developer.affectiva.com/eaasapi/
+            job_name: (optional) Which classifier set to use. See: http://developer.affectiva.com/eaasapi/
 
         Returns:
             JSON response with keys ['status', 'updated', 'name', 'author', 'self', 'published', 'input']
