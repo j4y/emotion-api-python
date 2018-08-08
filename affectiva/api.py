@@ -52,12 +52,13 @@ class EmotionAPI:
         resp = requests.get(self.INDEX_SERVICE_URL, headers=ACCEPT_JSON)
         return resp.json()[version][self.JOB_SERVICE_KEY]
 
-    def create_job(self, media_path, job_name='multiface'):
+    def create_job(self, media_path, job_name='multiface', extra_params={}):
         """Upload a media file (e.g. video) for processing.
 
         Args:
             media_path: Path to local media file to be uploaded
             job_name: (optional) Which classifier set to use. See: http://developer.affectiva.com/eaasapi/
+            extra_params: (optional) A dictionary of additional parameters to pass to the API
 
         Returns:
              JSON response with keys: 'status', 'updated', 'name', 'author', 'self', 'published', 'input'
@@ -65,7 +66,7 @@ class EmotionAPI:
         with open(media_path, 'rb') as video:
             files = {'entry_job[name]': (None, job_name),
                      'entry_job[input]': (os.path.basename(media_path), video)}
-            resp = requests.post(self._job_url, auth=self._auth, headers=ACCEPT_JSON, files=files)
+            resp = requests.post(self._job_url, auth=self._auth, headers=ACCEPT_JSON, files=files, data=extra_params)
             resp.raise_for_status()
             return resp.json()
 
