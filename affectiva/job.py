@@ -34,7 +34,7 @@ class Base(object):
         return resp.json()
 
     def _delete(self, url):
-        requests.delete(url, auth=self._auth)
+        return requests.delete(url, auth=self._auth, headers=self._headers)
 
 
 class Entry(Base):
