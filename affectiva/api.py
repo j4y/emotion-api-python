@@ -99,6 +99,26 @@ class EmotionAPI:
         resp.raise_for_status()
         return resp.json()
 
+    def download_representation(self, representation, output_dir='.'):
+        """download a representation and save locally.
+
+        Args:
+            representation: dict containing the representation data
+            content_type:  Content type to retrieve e.g. 'application/csv'
+            output_dir: (optional) Local folder where we will save the asset.
+
+        Returns:
+            Path to local file
+        """
+        file_name = representation['file_name']
+        local_path = os.path.join(output_dir, file_name)
+        with open(local_path, 'wb') as fout:
+            media_url = representation['media']
+            media_resp = requests.get(media_url, auth=self._auth)
+            media_resp.raise_for_status()
+            fout.write(media_resp.content)
+        return local_path
+
     def download_results(self, job_url, content_type='application/csv', output_dir='.'):
         """download results from a job and save locally.
 
@@ -112,26 +132,14 @@ class EmotionAPI:
         """
         job_json = self.query_job(job_url)
 
-        result_json = None
         all_representations_json = job_json['result']['representations']
         for representation_json in all_representations_json:
             if representation_json['content_type'] == content_type:
-                result_json = representation_json
-                break
+                return self.download_representation(representation_json, output_dir)
 
-        if result_json is None:
-            all_content_types = [x['content_type'] for x in all_representations_json]
-            raise ValueError("Could not match content_type '%s'.\n"
-                             "Available content-types: %s" % (content_type, str(all_content_types)))
-        else:
-            file_name = result_json['file_name']
-            local_path = os.path.join(output_dir, file_name)
-            with open(local_path, 'wb') as fout:
-                media_url = result_json['media']
-                media_resp = requests.get(media_url, auth=self._auth)
-                media_resp.raise_for_status()
-                fout.write(media_resp.content)
-            return local_path
+        all_content_types = [x['content_type'] for x in all_representations_json]
+        raise ValueError("Could not match content_type '%s'.\n"
+                         "Available content-types: %s" % (content_type, str(all_content_types)))
 
     def results(self, job_url):
         """Returns the results for a processed image or video.
@@ -168,6 +176,12 @@ class EmotionAPI:
         resp.raise_for_status()
         return resp.json()
 
+    def add_annotations(self, entry, annotations):
+        """Add a list of annotations to an entry.  Each annotation is a dict with the keys 'source', 'key', and 'value'.
+        """
+        for annotation in annotations:
+            self.add_annotation(entry, annotation['source'], annotation['key'], annotation['value'])
+
     def add_representation(self, entry, media_path, mimetype):
         """Upload an additional representation to the provided entry.
         Args:
@@ -187,3 +201,20 @@ class EmotionAPI:
         resp = requests.post(entry['representation_self'], auth=self._auth, headers=ACCEPT_JSON, files=metadata)
         resp.raise_for_status()
         return resp.json()
+
+    def update_representation(self, representation, media_path, mimetype):
+        """Update the media attached to the provided representation.
+        Args:
+            entry: A dict containing the representation to which the
+              media will be attached.
+            media_path: Path to local media file to be uploaded.
+            mimetype: A string with the representation's media type.
+        Example:
+        >>> from affectiva.api import EmotionAPI
+        >>> e = EmotionAPI()
+        >>> j = e.create_job('video1.mp4')
+        >>> e.update_representation(j['input']['representations'][0],'video2.mp4','application/vnd.affectiva.example+mp4')
+        """
+        metadata = {'media': (media_path, open(media_path, 'rb'), mimetype)}
+        resp = requests.put(representation['self'], auth=self._auth, headers=ACCEPT_JSON, files=metadata)
+        resp.raise_for_status()
