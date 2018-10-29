@@ -133,10 +133,7 @@ class Entry(Base):
 
         annotations = self.annotations()
         for a in annotations:
-            if (a['source'] == annotation['source'] and
-                    a['key'] == annotation['key'] and
-                    a['value'] == annotation['value']):
-
+            if (a['source'] == annotation['source'] and a['key'] == annotation['key'] and a['value'] == annotation['value']):
                 self._delete(a['self'])
                 break
 
