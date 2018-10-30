@@ -1,6 +1,7 @@
 import requests
 import json
 import shutil
+import warnings
 
 
 ACCEPT_JSON = {'Accept': 'application/json'}
@@ -12,6 +13,9 @@ class Base(object):
     _password = ''
 
     def __init__(self, url=None, user=None, password=None):
+
+        warnings.warn('please use affectiva.api.EmotionAPI', DeprecationWarning)
+
         self._url = url
         self._user = user
         self._password = password
