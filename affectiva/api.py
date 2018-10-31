@@ -182,6 +182,14 @@ class EmotionAPI:
         for annotation in annotations:
             self.add_annotation(entry, annotation['source'], annotation['key'], annotation['value'])
 
+    def delete_annotation(self, entry, source, key):
+        """Delete an annotation from an entry."""
+        annotations = self.query_job(entry['annotations'])
+        for a in annotations:
+            if a['source'] == source and a['key'] == key:
+                resp = requests.delete(a['self'], auth=self._auth, headers=ACCEPT_JSON)
+                resp.raise_for_status()
+
     def add_representation(self, entry, media_path, mimetype):
         """Upload an additional representation to the provided entry.
         Args:
