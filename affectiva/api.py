@@ -5,7 +5,7 @@ import requests
 ACCEPT_JSON = {'Accept': 'application/json'}
 
 
-class EmotionAPI:
+class EmotionAPI(object):
     """Class to handle interfacing with Affectiva's Emotion as a Service API.
 
     Example usage:
