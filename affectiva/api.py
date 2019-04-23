@@ -1,5 +1,5 @@
 import os
-
+import mimetypes
 import requests
 
 ACCEPT_JSON = {'Accept': 'application/json'}
@@ -66,9 +66,10 @@ class EmotionAPI(object):
         Returns:
              JSON response with keys: 'status', 'updated', 'name', 'author', 'self', 'published', 'input'
         """
+        mime_type = mimetypes.guess_type(media_path)[0]
         with open(media_path, 'rb') as video:
             files = {'entry_job[name]': (None, job_name),
-                     'entry_job[input]': (os.path.basename(media_path), video)}
+                     'entry_job[input]': (os.path.basename(media_path), video, mime_type)}
             resp = requests.post(self._job_url, auth=self._auth, headers=ACCEPT_JSON, files=files, data=extra_params)
             resp.raise_for_status()
             return resp.json()
