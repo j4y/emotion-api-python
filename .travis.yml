@@ -6,6 +6,8 @@ install:
 script:
 - python setup.py flake8
 - python setup.py sdist
+# command to run tests
+- nosetests
 before_deploy:
 - export RELEASE_PKG_FILE=$(ls dist/*.tar.gz)
 deploy:

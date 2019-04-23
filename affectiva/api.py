@@ -19,8 +19,8 @@ class EmotionAPI(object):
 
     EAAS_USER_ENV_VAR = 'AFFECTIVA_API_USER'  # Environment variable from which we will attempt to user (for authentication)
     EAAS_PASS_ENV_VAR = 'AFFECTIVA_API_PASSWORD'  # Environment variable from which we will attempt to password (for authentication)
-
-    INDEX_SERVICE_URL = 'https://index.affectiva.com'
+    EAAS_SERVICE_URL_ENV_VAR = 'AFFECTIVA_API_SERVICE_URL'  # Environment variable to overide the index server url. (only used for testing)
+    INDEX_SERVICE_URL = 'https://index.affectiva.com'  # default index server url
     JOB_SERVICE_KEY = 'jobs'
 
     def __init__(self, user=None, password=None, version='v1'):
@@ -34,6 +34,8 @@ class EmotionAPI(object):
         """
         self._user = user if user else os.environ.get(self.EAAS_USER_ENV_VAR, None)
         self._password = password if password else os.environ.get(self.EAAS_PASS_ENV_VAR, None)
+        # allow index service URL to be overridden with an environment variable for testing
+        self.INDEX_SERVICE_URL = os.environ.get(self.EAAS_SERVICE_URL_ENV_VAR, self.INDEX_SERVICE_URL)
         self._auth = (self._user, self._password)
         if self._user is None:
             raise ValueError("No username provided.")
