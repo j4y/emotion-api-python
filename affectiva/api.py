@@ -87,6 +87,17 @@ class EmotionAPI(object):
         resp.raise_for_status()
         return resp.json()
 
+    def requeue_job(self, job_url):
+        """Requeue the job for processing.
+
+        Returns:
+            JSON response with keys ['status', 'updated', 'name', 'author', 'self', 'published', 'input']
+        """
+        requeue_url = os.path.join(job_url, 'requeue')
+        resp = requests.post(requeue_url, auth=self._auth, headers=ACCEPT_JSON)
+        resp.raise_for_status()
+        return resp.json()
+
     def update_job(self, job_url, job_name=None):
         """Update the job.
 
