@@ -8,12 +8,14 @@ from affectiva.api import EmotionAPI
 class TestApi(unittest.TestCase):
 
     def test_init_without_username(self):
-        with self.assertRaisesRegexp(ValueError, "No username provided."):
-            EmotionAPI(None, 'pass')()
+        with mock.patch.dict('os.environ', {}, clear=True):
+            with self.assertRaisesRegexp(ValueError, "No username provided."):
+                EmotionAPI(None, 'pass')()
 
     def test_init_without_password(self):
-        with self.assertRaisesRegexp(ValueError, "No password provided."):
-            EmotionAPI('user', None)()
+        with mock.patch.dict('os.environ', {}, clear=True):
+            with self.assertRaisesRegexp(ValueError, "No password provided."):
+                EmotionAPI('user', None)()
 
     @mock.patch('requests.get')
     def test_init_default_service_url(self, mockget):
