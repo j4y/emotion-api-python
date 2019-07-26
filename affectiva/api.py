@@ -26,6 +26,7 @@ class EmotionAPI(object):
     EAAS_SERVICE_URL_ENV_VAR = 'AFFECTIVA_API_SERVICE_URL'  # Environment variable to overide the index server url. (only used for testing)
     INDEX_SERVICE_URL = 'https://index.affectiva.com'  # default index server url
     JOB_SERVICE_KEY = 'jobs'
+    ENTRY_SERVICE_KEY = 'entries'
 
     def __init__(self, user=None, password=None, version='v1'):
         """Initialize.
@@ -46,18 +47,18 @@ class EmotionAPI(object):
         if self._password is None:
             raise ValueError("No password provided.")
 
-        self._job_url = self._get_job_service_url(version)
+        self._index = self._get_index(version)
 
-    def _get_job_service_url(self, version):
-        """Connect to the index service and retrieve the job service URL.
+    def _get_index(self, version):
+        """Connect to the index service and retrieve the index.
 
         Args:
-            version:  Job version string (e.g. 'v1')
+            version:  Index version string (e.g. 'v1')
         """
 
         resp = requests.get(self.INDEX_SERVICE_URL, headers=ACCEPT_JSON)
         resp.raise_for_status()
-        return resp.json()[version][self.JOB_SERVICE_KEY]
+        return resp.json()[version]
 
     def create_job(self, media_path, job_name='multiface', extra_params={}):
         """Upload a media file (e.g. video) for processing.
@@ -76,9 +77,31 @@ class EmotionAPI(object):
                      'entry_job[input]': (os.path.basename(media_path), video, mime_type)}
             files.update(extra_params)
             data, headers = self._prep_payload(files)
-            resp = requests.post(self._job_url, data=data, headers=headers, auth=self._auth)
+            resp = requests.post(self._index[self.JOB_SERVICE_KEY], data=data, headers=headers, auth=self._auth)
             resp.raise_for_status()
             return resp.json()
+
+    def create_entry(self, media_path, annotations=[], extra_params={}):
+        """Upload a media file (e.g. video) without processing it.
+
+        Args:
+            media_path: Path to local media file to be uploaded
+            annotations: (optional) a list of annotations to add to the entry.  Each annotation is a dict with the keys 'source', 'key', and 'value'.
+            extra_params: (optional) A dictionary of additional parameters to pass to the API
+
+        Returns:
+             JSON response with keys: 'status', 'updated', 'name', 'author', 'self', 'published', 'input'
+        """
+        mime_type = mimetypes.guess_type(media_path)[0]
+        with open(media_path, 'rb') as video:
+            files = {'entry[media]': (os.path.basename(media_path), video, mime_type)}
+            files.update(extra_params)
+            data, headers = self._prep_payload(files)
+            resp = requests.post(self._index[self.ENTRY_SERVICE_KEY], data=data, headers=headers, auth=self._auth)
+            resp.raise_for_status()
+            entry = resp.json()
+            self.add_annotations(entry, annotations)
+            return entry
 
     def query_job(self, job_url):
         """Connect to a created job and return job status.
@@ -218,7 +241,7 @@ class EmotionAPI(object):
             JSON response containing all the jobs.
             ['status', 'updated', 'author', 'self', 'filename', 'published']
         """
-        resp = requests.get(self._job_url, auth=self._auth, headers=ACCEPT_JSON)
+        resp = requests.get(self._index[self.JOB_SERVICE_KEY], auth=self._auth, headers=ACCEPT_JSON)
         resp.raise_for_status()
         return resp.json()
 
