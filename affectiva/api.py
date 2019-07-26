@@ -1,6 +1,7 @@
 import os
 import mimetypes
 import requests
+import shutil
 
 from requests_toolbelt import MultipartEncoder
 
@@ -130,13 +131,9 @@ class EmotionAPI(object):
         Returns:
             Path to local file
         """
-        file_name = representation['file_name']
-        local_path = os.path.join(output_dir, file_name)
+        local_path = os.path.join(output_dir, representation['file_name'])
         with open(local_path, 'wb') as fout:
-            media_url = representation['media']
-            media_resp = requests.get(media_url, auth=self._auth)
-            media_resp.raise_for_status()
-            fout.write(media_resp.content)
+            self._download(representation['media'], fout)
         return local_path
 
     def download_results(self, job_url, content_type='application/csv', output_dir='.'):
@@ -193,9 +190,7 @@ class EmotionAPI(object):
             local_path = os.path.join(output_dir, dst_file_name)
 
             with open(local_path, 'wb') as fout:
-                media_url = result_json['media']
-                media_resp = requests.get(media_url, auth=self._auth)
-                fout.write(media_resp.content)
+                self._download(result_json['media'], fout)
             return local_path
 
     def results(self, job_url):
@@ -292,3 +287,12 @@ class EmotionAPI(object):
         headers = {'Content-Type': data.content_type}
         headers.update(ACCEPT_JSON)
         return data, headers
+
+    def _download(self, url, dest):
+        """Download from the URL to the open file handle 'dest'.  Streams from
+        source to dest without reading the whole megilah into memory.
+
+        """
+        with requests.get(url, auth=self._auth, stream=True) as media_resp:
+            media_resp.raise_for_status()
+            shutil.copyfileobj(media_resp.raw, dest)
