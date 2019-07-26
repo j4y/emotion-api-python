@@ -2,6 +2,9 @@ import os
 import mimetypes
 import requests
 
+from requests_toolbelt import MultipartEncoder
+
+
 ACCEPT_JSON = {'Accept': 'application/json'}
 
 
@@ -70,7 +73,9 @@ class EmotionAPI(object):
         with open(media_path, 'rb') as video:
             files = {'entry_job[name]': (None, job_name),
                      'entry_job[input]': (os.path.basename(media_path), video, mime_type)}
-            resp = requests.post(self._job_url, auth=self._auth, headers=ACCEPT_JSON, files=files, data=extra_params)
+            files.update(extra_params)
+            data, headers = self._prep_payload(files)
+            resp = requests.post(self._job_url, data=data, headers=headers, auth=self._auth)
             resp.raise_for_status()
             return resp.json()
 
@@ -257,8 +262,8 @@ class EmotionAPI(object):
         >>> j = e.create_job('video1.mp4')
         >>> e.add_representation(j['input'],'video2.mp4','application/vnd.affectiva.example+mp4')
         """
-        metadata = {'media': (media_path, open(media_path, 'rb'), mimetype)}
-        resp = requests.post(entry['representation_self'], auth=self._auth, headers=ACCEPT_JSON, files=metadata)
+        data, headers = self._prep_payload({'media': (media_path, open(media_path, 'rb'), mimetype)})
+        resp = requests.post(entry['representation_self'], data=data, headers=headers, auth=self._auth)
         resp.raise_for_status()
         return resp.json()
 
@@ -275,6 +280,15 @@ class EmotionAPI(object):
         >>> j = e.create_job('video1.mp4')
         >>> e.update_representation(j['input']['representations'][0],'video2.mp4','application/vnd.affectiva.example+mp4')
         """
-        metadata = {'media': (media_path, open(media_path, 'rb'), mimetype)}
-        resp = requests.put(representation['self'], auth=self._auth, headers=ACCEPT_JSON, files=metadata)
+        data, headers = self._prep_payload({'media': (media_path, open(media_path, 'rb'), mimetype)})
+        resp = requests.put(representation['self'], data=data, headers=headers, auth=self._auth)
         resp.raise_for_status()
+
+    def _prep_payload(self, params):
+        """Prepares a multipart payload that can be used for a streaming
+        upload.  Pass in a dict, get back data and headers.
+        """
+        data = MultipartEncoder(params)
+        headers = {'Content-Type': data.content_type}
+        headers.update(ACCEPT_JSON)
+        return data, headers
