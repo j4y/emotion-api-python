@@ -27,7 +27,7 @@ class TestApi(unittest.TestCase):
         expected_service_url = 'https://index.affectiva.com'
 
         api = EmotionAPI('user', 'pass')
-        self.assertEqual(api._job_url, expected_job_url)
+        self.assertEqual(api._index[EmotionAPI.JOB_SERVICE_KEY], expected_job_url)
         mockget.assert_called_once_with(expected_service_url, headers={'Accept': 'application/json'})
 
     @mock.patch('requests.get')
@@ -42,7 +42,7 @@ class TestApi(unittest.TestCase):
         os.environ["AFFECTIVA_API_SERVICE_URL"] = expected_service_url
 
         api = EmotionAPI('user', 'pass')
-        self.assertEqual(api._job_url, expected_job_url)
+        self.assertEqual(api._index[EmotionAPI.JOB_SERVICE_KEY], expected_job_url)
         mockget.assert_called_once_with(expected_service_url, headers={'Accept': 'application/json'})
 
 
