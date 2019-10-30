@@ -67,7 +67,7 @@ setup(
     # The minimal requirements for the library .. list all the requirements in
     # requirements.txt
     install_requires=[
-        'requests',
+        'requests >= 2.18',
         'requests_toolbelt'
     ],
 
